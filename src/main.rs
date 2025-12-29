@@ -1,3 +1,5 @@
+mod scanner;
+
 use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
 
@@ -47,17 +49,12 @@ enum Action {
 fn main() {
     let cli = Cli::parse();
 
-    println!("Scanning: {:?}", cli.path);
-    println!("Format: {:?}", cli.format);
-    println!("Action: {:?}", cli.action);
+    let files = scanner::scan_directory(&cli.path, cli.min_size);
 
-    if let Some(min) = cli.min_size {
-        println!("Min size: {} bytes", min);
-    }
+    println!("Found {} files", files.len());
 
-    if cli.dry_run {
-        println!("Dry run mode enabled");
-    }
+    let total_size: u64 = files.iter().map(|f| f.size).sum();
+    println!("Total size: {} bytes", total_size);
 }
 
 #[cfg(test)]
