@@ -1,3 +1,4 @@
+mod grouping;
 mod scanner;
 
 use clap::{Parser, ValueEnum};
@@ -49,12 +50,26 @@ enum Action {
 fn main() {
     let cli = Cli::parse();
 
+    // Stage 1: Scan directory for all files
     let files = scanner::scan_directory(&cli.path, cli.min_size);
-
     println!("Found {} files", files.len());
 
     let total_size: u64 = files.iter().map(|f| f.size).sum();
     println!("Total size: {} bytes", total_size);
+
+    // Stage 2: Group by size to find potential duplicates
+    let (groups, stats) = grouping::group_by_size_with_stats(files);
+
+    println!("\nSize grouping results:");
+    println!("  Candidate groups: {}", stats.n_candidate_groups);
+    println!(
+        "  Candidate files (need hashing): {}",
+        stats.n_candidate_files
+    );
+    println!(
+        "  Files eliminated (unique size): {}",
+        stats.total_files - stats.n_candidate_files
+    );
 }
 
 #[cfg(test)]
