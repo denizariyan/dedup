@@ -1,5 +1,6 @@
 mod grouping;
 mod hasher;
+mod output;
 mod scanner;
 
 use clap::{Parser, ValueEnum};
@@ -29,6 +30,10 @@ struct Cli {
     /// Preview changes without actually modifying files
     #[arg(long)]
     dry_run: bool,
+
+    /// Show detailed output (list each duplicate group)
+    #[arg(short, long)]
+    verbose: bool,
 }
 
 /// Output format options
@@ -51,29 +56,22 @@ enum Action {
 
 fn main() {
     let cli = Cli::parse();
+    let human = matches!(cli.format, OutputFormat::Human);
 
     // Stage 1: Scan directory for all files
     let files = scanner::scan_directory(&cli.path, cli.min_size);
-    println!("Found {} files", files.len());
 
-    let total_size: u64 = files.iter().map(|f| f.size).sum();
-    println!("Total size: {} bytes", total_size);
+    if human {
+        let total_size: u64 = files.iter().map(|f| f.size).sum();
+        println!("Scanned {} files ({} bytes)", files.len(), total_size);
+    }
 
     // Stage 2: Group by size to find potential duplicates
-    let (size_groups, stats) = grouping::group_by_size(files);
-    let n_candidate_files: usize = size_groups.iter().map(|g| g.len()).sum();
-
-    println!("\nSize grouping results:");
-    println!("  Candidate groups: {}", stats.n_candidate_groups);
-    println!("  Candidate files (need hashing): {}", n_candidate_files);
-    println!(
-        "  Files eliminated (unique size): {}",
-        stats.total_files - n_candidate_files
-    );
+    let size_groups = grouping::group_by_size(files);
 
     // Stage 3 & 4: Process each size group through partial hash -> full hash pipeline
     // Files from different size groups can't be duplicates, so we keep them separate
-    let duplicate_groups: Vec<hasher::HashGroup> = size_groups
+    let duplicate_groups: hasher::HashGroups = size_groups
         .into_par_iter()
         .flat_map(|size_group| {
             // Within this size group: partial hash -> full hash
@@ -83,11 +81,13 @@ fn main() {
                 .flat_map(|pg| hasher::group_by_full_hash(pg))
         })
         .collect();
-    let duplicate_files: usize = duplicate_groups.iter().map(|g| g.len()).sum();
 
-    println!("\nFull hash results (confirmed duplicates):");
-    println!("  Duplicate groups: {}", duplicate_groups.len());
-    println!("  Total duplicate files: {}", duplicate_files);
+    let report = output::DuplicateReport::from_groups(duplicate_groups);
+
+    match cli.format {
+        OutputFormat::Human => report.print_human(cli.verbose),
+        OutputFormat::Json => report.print_json(),
+    }
 }
 
 #[cfg(test)]
@@ -109,6 +109,16 @@ mod tests {
         assert!(matches!(cli.action, Action::Report));
         assert_eq!(cli.min_size, None);
         assert!(!cli.dry_run);
+        assert!(!cli.verbose);
+    }
+
+    #[test]
+    fn test_verbose_flag() {
+        let cli = Cli::parse_from(["dedup", "--verbose"]);
+        assert!(cli.verbose);
+
+        let cli = Cli::parse_from(["dedup", "-v"]);
+        assert!(cli.verbose);
     }
 
     #[test]
