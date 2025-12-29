@@ -26,6 +26,11 @@ pub fn scan_directory(root: &Path, min_size: Option<u64>) -> Vec<FileEntry> {
 
             let size = metadata.len();
 
+            // Empty files are commonly used as placeholders, they are all "duplicates" but not interesting
+            if size == 0 {
+                return None;
+            }
+
             if size < min {
                 return None;
             }
@@ -164,5 +169,17 @@ mod tests {
 
         assert_eq!(files.len(), 1);
         assert!(files[0].path.ends_with("deep.txt"));
+    }
+
+    #[test]
+    fn test_skips_empty_files() {
+        let temp = TempDir::new().unwrap();
+        create_file(temp.path(), "empty.txt", b"");
+        create_file(temp.path(), "nonempty.txt", b"content");
+
+        let files = scan_directory(temp.path(), None);
+
+        assert_eq!(files.len(), 1);
+        assert!(files[0].path.ends_with("nonempty.txt"));
     }
 }

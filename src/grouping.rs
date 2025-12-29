@@ -95,13 +95,6 @@ mod tests {
     }
 
     #[test]
-    fn test_zero_size_files() {
-        let files = vec![file_entry("/empty1.txt", 0), file_entry("/empty2.txt", 0)];
-        let groups = group_by_size(files);
-        assert_eq!(groups.len(), 1);
-    }
-
-    #[test]
     fn test_paths_preserved() {
         let files = vec![
             file_entry("/path/to/file1.txt", 100),
