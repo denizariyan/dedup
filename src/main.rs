@@ -1,7 +1,9 @@
 mod grouping;
+mod hasher;
 mod scanner;
 
 use clap::{Parser, ValueEnum};
+use rayon::prelude::*;
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
@@ -58,18 +60,34 @@ fn main() {
     println!("Total size: {} bytes", total_size);
 
     // Stage 2: Group by size to find potential duplicates
-    let (groups, stats) = grouping::group_by_size_with_stats(files);
+    let (size_groups, stats) = grouping::group_by_size(files);
+    let n_candidate_files: usize = size_groups.iter().map(|g| g.len()).sum();
 
     println!("\nSize grouping results:");
     println!("  Candidate groups: {}", stats.n_candidate_groups);
-    println!(
-        "  Candidate files (need hashing): {}",
-        stats.n_candidate_files
-    );
+    println!("  Candidate files (need hashing): {}", n_candidate_files);
     println!(
         "  Files eliminated (unique size): {}",
-        stats.total_files - stats.n_candidate_files
+        stats.total_files - n_candidate_files
     );
+
+    // Stage 3 & 4: Process each size group through partial hash -> full hash pipeline
+    // Files from different size groups can't be duplicates, so we keep them separate
+    let duplicate_groups: Vec<hasher::HashGroup> = size_groups
+        .into_par_iter()
+        .flat_map(|size_group| {
+            // Within this size group: partial hash -> full hash
+            let partial_groups = hasher::group_by_partial_hash(size_group);
+            partial_groups
+                .into_par_iter()
+                .flat_map(|pg| hasher::group_by_full_hash(pg))
+        })
+        .collect();
+    let duplicate_files: usize = duplicate_groups.iter().map(|g| g.len()).sum();
+
+    println!("\nFull hash results (confirmed duplicates):");
+    println!("  Duplicate groups: {}", duplicate_groups.len());
+    println!("  Total duplicate files: {}", duplicate_files);
 }
 
 #[cfg(test)]
