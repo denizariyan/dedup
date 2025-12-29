@@ -63,6 +63,7 @@ pub fn hardlink_duplicates(
             result.bytes_saved += group.size;
 
             if !dry_run {
+                // TODO: better handling of files on different filesystems when hardlinking
                 match replace_with_hardlink(path, original) {
                     Ok(()) => {
                         if verbose {

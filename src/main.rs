@@ -5,9 +5,12 @@ mod output;
 mod scanner;
 mod util;
 
-use clap::{Parser, ValueEnum};
-use rayon::prelude::*;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+use clap::{Parser, ValueEnum};
+use indicatif::{ProgressBar, ProgressStyle};
+use rayon::prelude::*;
 
 #[derive(Parser, Debug)]
 #[command(name = "dedup")]
@@ -36,6 +39,10 @@ struct Cli {
     /// Show detailed output (list each duplicate group)
     #[arg(short, long)]
     verbose: bool,
+
+    /// Disable progress bars
+    #[arg(long)]
+    no_progress: bool,
 }
 
 /// Output format options
@@ -59,32 +66,82 @@ enum Action {
 fn main() {
     let cli = Cli::parse();
     let human = matches!(cli.format, OutputFormat::Human);
+    let show_progress = human && !cli.no_progress;
 
     // Stage 1: Scan directory for all files
+    let scan_spinner = if show_progress {
+        let sp = ProgressBar::new_spinner();
+        sp.set_style(
+            ProgressStyle::default_spinner()
+                .template("{spinner:.green} {msg}")
+                .unwrap(),
+        );
+        sp.set_message("Scanning files...");
+        sp.enable_steady_tick(std::time::Duration::from_millis(100));
+        Some(sp)
+    } else {
+        None
+    };
+
     let files = scanner::scan_directory(&cli.path, cli.min_size);
 
-    if human {
+    if let Some(sp) = scan_spinner {
+        sp.finish_and_clear();
+    }
+
+    if human && cli.no_progress {
         let total_size: u64 = files.iter().map(|f| f.size).sum();
-        println!("Scanned {} files ({} bytes)", files.len(), total_size);
+        println!(
+            "Scanned {} files ({})",
+            files.len(),
+            util::format_bytes(total_size)
+        );
     }
 
     // Stage 2: Group by size to find potential duplicates
     let size_groups = grouping::group_by_size(files);
+    let candidate_count: usize = size_groups.iter().map(|g| g.len()).sum();
 
     // Stage 3 & 4: Process each size group through partial hash -> full hash pipeline
-    // Files from different size groups can't be duplicates, so we keep them separate
+    let progress_bar = if show_progress && candidate_count > 0 {
+        let pb = ProgressBar::new(candidate_count as u64);
+        pb.set_style(
+            ProgressStyle::default_bar()
+                .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} files compared")
+                .unwrap()
+                .progress_chars("#>-"),
+        );
+        Some(pb)
+    } else {
+        None
+    };
+
+    let processed = AtomicUsize::new(0);
+
     let duplicate_groups: hasher::HashGroups = size_groups
         .into_par_iter()
         .flat_map(|size_group| {
-            // Within this size group: partial hash -> full hash
+            let group_size = size_group.len();
             let partial_groups = hasher::group_by_partial_hash(size_group);
-            partial_groups
+
+            let final_groups = partial_groups
                 .into_par_iter()
-                .flat_map(|pg| hasher::group_by_full_hash(pg))
+                .flat_map(|pg| hasher::group_by_full_hash(pg));
+
+            if let Some(ref pb) = progress_bar {
+                let prev = processed.fetch_add(group_size, Ordering::Relaxed);
+                pb.set_position((prev + group_size) as u64);
+            }
+
+            final_groups
         })
         .collect();
 
     let report = output::DuplicateReport::from_groups(duplicate_groups);
+
+    if let Some(pb) = progress_bar {
+        pb.finish_and_clear();
+    }
 
     match cli.format {
         OutputFormat::Human => report.print_human(cli.verbose),
@@ -139,6 +196,7 @@ mod tests {
         assert_eq!(cli.min_size, None);
         assert!(!cli.dry_run);
         assert!(!cli.verbose);
+        assert!(!cli.no_progress);
     }
 
     #[test]
@@ -148,6 +206,12 @@ mod tests {
 
         let cli = Cli::parse_from(["dedup", "-v"]);
         assert!(cli.verbose);
+    }
+
+    #[test]
+    fn test_no_progress_flag() {
+        let cli = Cli::parse_from(["dedup", "--no-progress"]);
+        assert!(cli.no_progress);
     }
 
     #[test]
