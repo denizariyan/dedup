@@ -1,7 +1,9 @@
+mod actions;
 mod grouping;
 mod hasher;
 mod output;
 mod scanner;
+mod util;
 
 use clap::{Parser, ValueEnum};
 use rayon::prelude::*;
@@ -87,6 +89,33 @@ fn main() {
     match cli.format {
         OutputFormat::Human => report.print_human(cli.verbose),
         OutputFormat::Json => report.print_json(),
+    }
+
+    if matches!(cli.action, Action::Hardlink) {
+        let result = actions::hardlink_duplicates(&report.groups, cli.dry_run, cli.verbose);
+
+        if human {
+            if cli.dry_run {
+                println!(
+                    "\n[dry-run] Would link {} files, saving {}",
+                    result.files_linked,
+                    util::format_bytes(result.bytes_saved)
+                );
+            } else {
+                println!(
+                    "\nLinked {} files, saved {}",
+                    result.files_linked,
+                    util::format_bytes(result.bytes_saved)
+                );
+            }
+
+            if !result.errors.is_empty() {
+                eprintln!("\nErrors ({}):", result.errors.len());
+                for (path, err) in &result.errors {
+                    eprintln!("  {}: {}", path.display(), err);
+                }
+            }
+        }
     }
 }
 
