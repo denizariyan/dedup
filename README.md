@@ -36,6 +36,12 @@ Optionally, duplicate files can be replaced with hardlinks to save disk space.
 cargo install dedup-cli
 ```
 
+### Homebrew
+
+```bash
+brew install denizariyan/tap/dedup
+```
+
 ### From Source
 
 ```bash
