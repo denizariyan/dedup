@@ -1,0 +1,913 @@
+{
+  "matrix": [
+    {
+      "profile": "small-heavy",
+      "dup_ratio": 0.1,
+      "metadata": {
+        "total_files": 39747,
+        "total_bytes": 10741081039,
+        "unique_files": 35682,
+        "duplicate_files": 4065,
+        "duplicate_ratio": 0.1,
+        "profile": "small-heavy",
+        "files_in_duplicate_groups": 7701,
+        "duplicate_groups": 3636
+      },
+      "results": [
+        {
+          "tool": "dedup",
+          "avg_time": 1.8760749880000276,
+          "min_time": 1.8760749880000276,
+          "times": [
+            1.8760749880000276
+          ],
+          "memory_kb": [
+            18184
+          ],
+          "avg_memory_mb": 17.7578125,
+          "max_memory_mb": 17.7578125,
+          "duplicates_found": 7701,
+          "expected_duplicates": 7701,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fclones",
+          "avg_time": 3.438263405999919,
+          "min_time": 3.438263405999919,
+          "times": [
+            3.438263405999919
+          ],
+          "memory_kb": [
+            31132
+          ],
+          "avg_memory_mb": 30.40234375,
+          "max_memory_mb": 30.40234375,
+          "duplicates_found": 7701,
+          "expected_duplicates": 7701,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fdupes",
+          "avg_time": 17.26061184599996,
+          "min_time": 17.26061184599996,
+          "times": [
+            17.26061184599996
+          ],
+          "memory_kb": [
+            11876
+          ],
+          "avg_memory_mb": 11.59765625,
+          "max_memory_mb": 11.59765625,
+          "duplicates_found": 7701,
+          "expected_duplicates": 7701,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "rdfind",
+          "avg_time": 15.273938115999954,
+          "min_time": 15.273938115999954,
+          "times": [
+            15.273938115999954
+          ],
+          "memory_kb": [
+            18624
+          ],
+          "avg_memory_mb": 18.1875,
+          "max_memory_mb": 18.1875,
+          "duplicates_found": 7701,
+          "expected_duplicates": 7701,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "bash+md5",
+          "avg_time": 33.96547186200007,
+          "min_time": 33.96547186200007,
+          "times": [
+            33.96547186200007
+          ],
+          "memory_kb": [
+            5712
+          ],
+          "avg_memory_mb": 5.578125,
+          "max_memory_mb": 5.578125,
+          "duplicates_found": 7701,
+          "expected_duplicates": 7701,
+          "accuracy": 100.0,
+          "error": null
+        }
+      ]
+    },
+    {
+      "profile": "small-heavy",
+      "dup_ratio": 0.3,
+      "metadata": {
+        "total_files": 38632,
+        "total_bytes": 10740323193,
+        "unique_files": 26921,
+        "duplicate_files": 11711,
+        "duplicate_ratio": 0.3,
+        "profile": "small-heavy",
+        "files_in_duplicate_groups": 19867,
+        "duplicate_groups": 8156
+      },
+      "results": [
+        {
+          "tool": "dedup",
+          "avg_time": 3.8676722330000075,
+          "min_time": 3.8676722330000075,
+          "times": [
+            3.8676722330000075
+          ],
+          "memory_kb": [
+            18408
+          ],
+          "avg_memory_mb": 17.9765625,
+          "max_memory_mb": 17.9765625,
+          "duplicates_found": 19867,
+          "expected_duplicates": 19867,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fclones",
+          "avg_time": 7.114748802999998,
+          "min_time": 7.114748802999998,
+          "times": [
+            7.114748802999998
+          ],
+          "memory_kb": [
+            31040
+          ],
+          "avg_memory_mb": 30.3125,
+          "max_memory_mb": 30.3125,
+          "duplicates_found": 19867,
+          "expected_duplicates": 19867,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fdupes",
+          "avg_time": 27.278517205999947,
+          "min_time": 27.278517205999947,
+          "times": [
+            27.278517205999947
+          ],
+          "memory_kb": [
+            11868
+          ],
+          "avg_memory_mb": 11.58984375,
+          "max_memory_mb": 11.58984375,
+          "duplicates_found": 19867,
+          "expected_duplicates": 19867,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "rdfind",
+          "avg_time": 22.79548647799993,
+          "min_time": 22.79548647799993,
+          "times": [
+            22.79548647799993
+          ],
+          "memory_kb": [
+            18552
+          ],
+          "avg_memory_mb": 18.1171875,
+          "max_memory_mb": 18.1171875,
+          "duplicates_found": 19867,
+          "expected_duplicates": 19867,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "bash+md5",
+          "avg_time": 33.60210553000002,
+          "min_time": 33.60210553000002,
+          "times": [
+            33.60210553000002
+          ],
+          "memory_kb": [
+            5124
+          ],
+          "avg_memory_mb": 5.00390625,
+          "max_memory_mb": 5.00390625,
+          "duplicates_found": 19867,
+          "expected_duplicates": 19867,
+          "accuracy": 100.0,
+          "error": null
+        }
+      ]
+    },
+    {
+      "profile": "small-heavy",
+      "dup_ratio": 0.6,
+      "metadata": {
+        "total_files": 36172,
+        "total_bytes": 10740935262,
+        "unique_files": 14609,
+        "duplicate_files": 21563,
+        "duplicate_ratio": 0.6,
+        "profile": "small-heavy",
+        "files_in_duplicate_groups": 30224,
+        "duplicate_groups": 8661
+      },
+      "results": [
+        {
+          "tool": "dedup",
+          "avg_time": 5.8783310930000425,
+          "min_time": 5.8783310930000425,
+          "times": [
+            5.8783310930000425
+          ],
+          "memory_kb": [
+            18712
+          ],
+          "avg_memory_mb": 18.2734375,
+          "max_memory_mb": 18.2734375,
+          "duplicates_found": 30224,
+          "expected_duplicates": 30224,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fclones",
+          "avg_time": 10.908982357000014,
+          "min_time": 10.908982357000014,
+          "times": [
+            10.908982357000014
+          ],
+          "memory_kb": [
+            32320
+          ],
+          "avg_memory_mb": 31.5625,
+          "max_memory_mb": 31.5625,
+          "duplicates_found": 30224,
+          "expected_duplicates": 30224,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fdupes",
+          "avg_time": 34.751436841999976,
+          "min_time": 34.751436841999976,
+          "times": [
+            34.751436841999976
+          ],
+          "memory_kb": [
+            11432
+          ],
+          "avg_memory_mb": 11.1640625,
+          "max_memory_mb": 11.1640625,
+          "duplicates_found": 30224,
+          "expected_duplicates": 30224,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "rdfind",
+          "avg_time": 28.44197855199991,
+          "min_time": 28.44197855199991,
+          "times": [
+            28.44197855199991
+          ],
+          "memory_kb": [
+            18152
+          ],
+          "avg_memory_mb": 17.7265625,
+          "max_memory_mb": 17.7265625,
+          "duplicates_found": 30224,
+          "expected_duplicates": 30224,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "bash+md5",
+          "avg_time": 32.201443761000064,
+          "min_time": 32.201443761000064,
+          "times": [
+            32.201443761000064
+          ],
+          "memory_kb": [
+            5092
+          ],
+          "avg_memory_mb": 4.97265625,
+          "max_memory_mb": 4.97265625,
+          "duplicates_found": 30224,
+          "expected_duplicates": 30224,
+          "accuracy": 100.0,
+          "error": null
+        }
+      ]
+    },
+    {
+      "profile": "mixed",
+      "dup_ratio": 0.1,
+      "metadata": {
+        "total_files": 10215,
+        "total_bytes": 10745457486,
+        "unique_files": 9169,
+        "duplicate_files": 1046,
+        "duplicate_ratio": 0.1,
+        "profile": "mixed",
+        "files_in_duplicate_groups": 1980,
+        "duplicate_groups": 934
+      },
+      "results": [
+        {
+          "tool": "dedup",
+          "avg_time": 1.355264390000002,
+          "min_time": 1.355264390000002,
+          "times": [
+            1.355264390000002
+          ],
+          "memory_kb": [
+            10004
+          ],
+          "avg_memory_mb": 9.76953125,
+          "max_memory_mb": 9.76953125,
+          "duplicates_found": 1980,
+          "expected_duplicates": 1980,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fclones",
+          "avg_time": 2.309050854999896,
+          "min_time": 2.309050854999896,
+          "times": [
+            2.309050854999896
+          ],
+          "memory_kb": [
+            19632
+          ],
+          "avg_memory_mb": 19.171875,
+          "max_memory_mb": 19.171875,
+          "duplicates_found": 1980,
+          "expected_duplicates": 1980,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fdupes",
+          "avg_time": 7.481667394000169,
+          "min_time": 7.481667394000169,
+          "times": [
+            7.481667394000169
+          ],
+          "memory_kb": [
+            4456
+          ],
+          "avg_memory_mb": 4.3515625,
+          "max_memory_mb": 4.3515625,
+          "duplicates_found": 1980,
+          "expected_duplicates": 1980,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "rdfind",
+          "avg_time": 5.969535054000062,
+          "min_time": 5.969535054000062,
+          "times": [
+            5.969535054000062
+          ],
+          "memory_kb": [
+            6628
+          ],
+          "avg_memory_mb": 6.47265625,
+          "max_memory_mb": 6.47265625,
+          "duplicates_found": 1980,
+          "expected_duplicates": 1980,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "bash+md5",
+          "avg_time": 21.34974226600002,
+          "min_time": 21.34974226600002,
+          "times": [
+            21.34974226600002
+          ],
+          "memory_kb": [
+            4112
+          ],
+          "avg_memory_mb": 4.015625,
+          "max_memory_mb": 4.015625,
+          "duplicates_found": 1980,
+          "expected_duplicates": 1980,
+          "accuracy": 100.0,
+          "error": null
+        }
+      ]
+    },
+    {
+      "profile": "mixed",
+      "dup_ratio": 0.3,
+      "metadata": {
+        "total_files": 9877,
+        "total_bytes": 10739793657,
+        "unique_files": 6894,
+        "duplicate_files": 2983,
+        "duplicate_ratio": 0.3,
+        "profile": "mixed",
+        "files_in_duplicate_groups": 5066,
+        "duplicate_groups": 2083
+      },
+      "results": [
+        {
+          "tool": "dedup",
+          "avg_time": 3.353699106000022,
+          "min_time": 3.353699106000022,
+          "times": [
+            3.353699106000022
+          ],
+          "memory_kb": [
+            10268
+          ],
+          "avg_memory_mb": 10.02734375,
+          "max_memory_mb": 10.02734375,
+          "duplicates_found": 5066,
+          "expected_duplicates": 5066,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fclones",
+          "avg_time": 5.589029540999945,
+          "min_time": 5.589029540999945,
+          "times": [
+            5.589029540999945
+          ],
+          "memory_kb": [
+            18044
+          ],
+          "avg_memory_mb": 17.62109375,
+          "max_memory_mb": 17.62109375,
+          "duplicates_found": 5066,
+          "expected_duplicates": 5066,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fdupes",
+          "avg_time": 15.228156002000105,
+          "min_time": 15.228156002000105,
+          "times": [
+            15.228156002000105
+          ],
+          "memory_kb": [
+            4444
+          ],
+          "avg_memory_mb": 4.33984375,
+          "max_memory_mb": 4.33984375,
+          "duplicates_found": 5066,
+          "expected_duplicates": 5066,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "rdfind",
+          "avg_time": 12.102049910000005,
+          "min_time": 12.102049910000005,
+          "times": [
+            12.102049910000005
+          ],
+          "memory_kb": [
+            7552
+          ],
+          "avg_memory_mb": 7.375,
+          "max_memory_mb": 7.375,
+          "duplicates_found": 5066,
+          "expected_duplicates": 5066,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "bash+md5",
+          "avg_time": 21.027505828999892,
+          "min_time": 21.027505828999892,
+          "times": [
+            21.027505828999892
+          ],
+          "memory_kb": [
+            2968
+          ],
+          "avg_memory_mb": 2.8984375,
+          "max_memory_mb": 2.8984375,
+          "duplicates_found": 5066,
+          "expected_duplicates": 5066,
+          "accuracy": 100.0,
+          "error": null
+        }
+      ]
+    },
+    {
+      "profile": "mixed",
+      "dup_ratio": 0.6,
+      "metadata": {
+        "total_files": 9200,
+        "total_bytes": 10747377778,
+        "unique_files": 3665,
+        "duplicate_files": 5535,
+        "duplicate_ratio": 0.6,
+        "profile": "mixed",
+        "files_in_duplicate_groups": 7736,
+        "duplicate_groups": 2201
+      },
+      "results": [
+        {
+          "tool": "dedup",
+          "avg_time": 5.26037030700013,
+          "min_time": 5.26037030700013,
+          "times": [
+            5.26037030700013
+          ],
+          "memory_kb": [
+            8276
+          ],
+          "avg_memory_mb": 8.08203125,
+          "max_memory_mb": 8.08203125,
+          "duplicates_found": 7736,
+          "expected_duplicates": 7736,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fclones",
+          "avg_time": 9.118903414999977,
+          "min_time": 9.118903414999977,
+          "times": [
+            9.118903414999977
+          ],
+          "memory_kb": [
+            17996
+          ],
+          "avg_memory_mb": 17.57421875,
+          "max_memory_mb": 17.57421875,
+          "duplicates_found": 7736,
+          "expected_duplicates": 7736,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fdupes",
+          "avg_time": 23.101248338999994,
+          "min_time": 23.101248338999994,
+          "times": [
+            23.101248338999994
+          ],
+          "memory_kb": [
+            4404
+          ],
+          "avg_memory_mb": 4.30078125,
+          "max_memory_mb": 4.30078125,
+          "duplicates_found": 7736,
+          "expected_duplicates": 7736,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "rdfind",
+          "avg_time": 17.633603226999867,
+          "min_time": 17.633603226999867,
+          "times": [
+            17.633603226999867
+          ],
+          "memory_kb": [
+            6688
+          ],
+          "avg_memory_mb": 6.53125,
+          "max_memory_mb": 6.53125,
+          "duplicates_found": 7736,
+          "expected_duplicates": 7736,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "bash+md5",
+          "avg_time": 20.886071033999997,
+          "min_time": 20.886071033999997,
+          "times": [
+            20.886071033999997
+          ],
+          "memory_kb": [
+            3108
+          ],
+          "avg_memory_mb": 3.03515625,
+          "max_memory_mb": 3.03515625,
+          "duplicates_found": 7736,
+          "expected_duplicates": 7736,
+          "accuracy": 100.0,
+          "error": null
+        }
+      ]
+    },
+    {
+      "profile": "large-heavy",
+      "dup_ratio": 0.1,
+      "metadata": {
+        "total_files": 3386,
+        "total_bytes": 10742021772,
+        "unique_files": 3047,
+        "duplicate_files": 339,
+        "duplicate_ratio": 0.1,
+        "profile": "large-heavy",
+        "files_in_duplicate_groups": 646,
+        "duplicate_groups": 307
+      },
+      "results": [
+        {
+          "tool": "dedup",
+          "avg_time": 1.1914589549999164,
+          "min_time": 1.1914589549999164,
+          "times": [
+            1.1914589549999164
+          ],
+          "memory_kb": [
+            6712
+          ],
+          "avg_memory_mb": 6.5546875,
+          "max_memory_mb": 6.5546875,
+          "duplicates_found": 646,
+          "expected_duplicates": 646,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fclones",
+          "avg_time": 1.9564589149999847,
+          "min_time": 1.9564589149999847,
+          "times": [
+            1.9564589149999847
+          ],
+          "memory_kb": [
+            14312
+          ],
+          "avg_memory_mb": 13.9765625,
+          "max_memory_mb": 13.9765625,
+          "duplicates_found": 646,
+          "expected_duplicates": 646,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fdupes",
+          "avg_time": 4.932566902999952,
+          "min_time": 4.932566902999952,
+          "times": [
+            4.932566902999952
+          ],
+          "memory_kb": [
+            2880
+          ],
+          "avg_memory_mb": 2.8125,
+          "max_memory_mb": 2.8125,
+          "duplicates_found": 646,
+          "expected_duplicates": 646,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "rdfind",
+          "avg_time": 3.8432566470000893,
+          "min_time": 3.8432566470000893,
+          "times": [
+            3.8432566470000893
+          ],
+          "memory_kb": [
+            4224
+          ],
+          "avg_memory_mb": 4.125,
+          "max_memory_mb": 4.125,
+          "duplicates_found": 646,
+          "expected_duplicates": 646,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "bash+md5",
+          "avg_time": 18.143287924000106,
+          "min_time": 18.143287924000106,
+          "times": [
+            18.143287924000106
+          ],
+          "memory_kb": [
+            3104
+          ],
+          "avg_memory_mb": 3.03125,
+          "max_memory_mb": 3.03125,
+          "duplicates_found": 646,
+          "expected_duplicates": 646,
+          "accuracy": 100.0,
+          "error": null
+        }
+      ]
+    },
+    {
+      "profile": "large-heavy",
+      "dup_ratio": 0.3,
+      "metadata": {
+        "total_files": 3306,
+        "total_bytes": 10740318554,
+        "unique_files": 2322,
+        "duplicate_files": 984,
+        "duplicate_ratio": 0.3,
+        "profile": "large-heavy",
+        "files_in_duplicate_groups": 1670,
+        "duplicate_groups": 686
+      },
+      "results": [
+        {
+          "tool": "dedup",
+          "avg_time": 3.249014668999962,
+          "min_time": 3.249014668999962,
+          "times": [
+            3.249014668999962
+          ],
+          "memory_kb": [
+            6628
+          ],
+          "avg_memory_mb": 6.47265625,
+          "max_memory_mb": 6.47265625,
+          "duplicates_found": 1670,
+          "expected_duplicates": 1670,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fclones",
+          "avg_time": 5.362291090999861,
+          "min_time": 5.362291090999861,
+          "times": [
+            5.362291090999861
+          ],
+          "memory_kb": [
+            14796
+          ],
+          "avg_memory_mb": 14.44921875,
+          "max_memory_mb": 14.44921875,
+          "duplicates_found": 1670,
+          "expected_duplicates": 1670,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fdupes",
+          "avg_time": 12.58082942100009,
+          "min_time": 12.58082942100009,
+          "times": [
+            12.58082942100009
+          ],
+          "memory_kb": [
+            2936
+          ],
+          "avg_memory_mb": 2.8671875,
+          "max_memory_mb": 2.8671875,
+          "duplicates_found": 1670,
+          "expected_duplicates": 1670,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "rdfind",
+          "avg_time": 9.274312761999909,
+          "min_time": 9.274312761999909,
+          "times": [
+            9.274312761999909
+          ],
+          "memory_kb": [
+            4332
+          ],
+          "avg_memory_mb": 4.23046875,
+          "max_memory_mb": 4.23046875,
+          "duplicates_found": 1670,
+          "expected_duplicates": 1670,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "bash+md5",
+          "avg_time": 17.90438531000018,
+          "min_time": 17.90438531000018,
+          "times": [
+            17.90438531000018
+          ],
+          "memory_kb": [
+            3108
+          ],
+          "avg_memory_mb": 3.03515625,
+          "max_memory_mb": 3.03515625,
+          "duplicates_found": 1670,
+          "expected_duplicates": 1670,
+          "accuracy": 100.0,
+          "error": null
+        }
+      ]
+    },
+    {
+      "profile": "large-heavy",
+      "dup_ratio": 0.6,
+      "metadata": {
+        "total_files": 3274,
+        "total_bytes": 10739205815,
+        "unique_files": 1327,
+        "duplicate_files": 1947,
+        "duplicate_ratio": 0.6,
+        "profile": "large-heavy",
+        "files_in_duplicate_groups": 2759,
+        "duplicate_groups": 812
+      },
+      "results": [
+        {
+          "tool": "dedup",
+          "avg_time": 5.128475950999928,
+          "min_time": 5.128475950999928,
+          "times": [
+            5.128475950999928
+          ],
+          "memory_kb": [
+            6692
+          ],
+          "avg_memory_mb": 6.53515625,
+          "max_memory_mb": 6.53515625,
+          "duplicates_found": 2759,
+          "expected_duplicates": 2759,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fclones",
+          "avg_time": 8.46442461499987,
+          "min_time": 8.46442461499987,
+          "times": [
+            8.46442461499987
+          ],
+          "memory_kb": [
+            15092
+          ],
+          "avg_memory_mb": 14.73828125,
+          "max_memory_mb": 14.73828125,
+          "duplicates_found": 2759,
+          "expected_duplicates": 2759,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "fdupes",
+          "avg_time": 20.302231110999855,
+          "min_time": 20.302231110999855,
+          "times": [
+            20.302231110999855
+          ],
+          "memory_kb": [
+            2936
+          ],
+          "avg_memory_mb": 2.8671875,
+          "max_memory_mb": 2.8671875,
+          "duplicates_found": 2759,
+          "expected_duplicates": 2759,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "rdfind",
+          "avg_time": 14.87574080000013,
+          "min_time": 14.87574080000013,
+          "times": [
+            14.87574080000013
+          ],
+          "memory_kb": [
+            4332
+          ],
+          "avg_memory_mb": 4.23046875,
+          "max_memory_mb": 4.23046875,
+          "duplicates_found": 2759,
+          "expected_duplicates": 2759,
+          "accuracy": 100.0,
+          "error": null
+        },
+        {
+          "tool": "bash+md5",
+          "avg_time": 18.08569155600003,
+          "min_time": 18.08569155600003,
+          "times": [
+            18.08569155600003
+          ],
+          "memory_kb": [
+            2992
+          ],
+          "avg_memory_mb": 2.921875,
+          "max_memory_mb": 2.921875,
+          "duplicates_found": 2759,
+          "expected_duplicates": 2759,
+          "accuracy": 100.0,
+          "error": null
+        }
+      ]
+    }
+  ]
+}
