@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 description = "An extremely fast and efficient duplicate file finder"
 license = "MIT"
-license-file = "LICENSE"
 repository = "https://github.com/denizariyan/dedup"
 readme = "README.md"
 keywords = ["duplicate", "file", "finder", "deduplication", "hash"]

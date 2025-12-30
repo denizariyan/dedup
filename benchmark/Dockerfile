@@ -32,4 +32,4 @@ RUN pip install --no-cache-dir matplotlib tqdm numpy
 
 COPY benchmark/*.py ./
 
-ENTRYPOINT ["python3", "benchmark.py"]
+ENTRYPOINT ["python3", "benchmark.py", "run"]
