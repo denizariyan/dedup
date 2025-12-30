@@ -13,10 +13,7 @@ pub type SizeGroups = Vec<Vec<PathBuf>>;
 pub fn group_by_size(files: Vec<FileEntry>) -> SizeGroups {
     let mut size_map: HashMap<u64, Vec<PathBuf>> = HashMap::new();
     for file in files {
-        size_map
-            .entry(file.size)
-            .or_insert_with(Vec::new)
-            .push(file.path);
+        size_map.entry(file.size).or_default().push(file.path);
     }
 
     size_map

@@ -62,7 +62,7 @@ where
 
     let mut hash_map: HashMap<blake3::Hash, Vec<PathBuf>> = HashMap::new();
     for (path, hash) in hashes {
-        hash_map.entry(hash).or_insert_with(Vec::new).push(path);
+        hash_map.entry(hash).or_default().push(path);
     }
 
     hash_map

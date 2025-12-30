@@ -126,7 +126,7 @@ fn main() {
 
             let final_groups = partial_groups
                 .into_par_iter()
-                .flat_map(|pg| hasher::group_by_full_hash(pg));
+                .flat_map(hasher::group_by_full_hash);
 
             if let Some(ref pb) = progress_bar {
                 let prev = processed.fetch_add(group_size, Ordering::Relaxed);
