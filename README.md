@@ -1,6 +1,24 @@
 # dedup
 
-A fast duplicate file finder written in Rust. Identifies duplicate files by content hash and optionally replaces them with hardlinks to reclaim disk space.
+An extremely fast and efficient duplicate file finder written in Rust to provide fast and
+accurate results while minimizing disk I/O.
+
+Files are compared using cryptographically secure hashing to ensure accuracy.
+
+Optionally, duplicate files can be replaced with hardlinks to save disk space.
+
+## Tree of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [CLI Options](#cli-options)
+- [Benchmarks](#benchmarks)
+- [How It Works](#how-it-works)
+- [Hardlinking](#hardlinking)
+- [Output Formats](#output-formats)
+- [Limitations](#limitations)
+- [License](#license)
 
 ## Features
 
@@ -28,25 +46,30 @@ dedup
 dedup /path/to/directory
 
 # Show each duplicate group (verbose)
-dedup /path -v
+dedup -v
 
 # Output as JSON
-dedup /path --format json
+dedup --format json
 
 # Dry-run replacing duplicates with hardlinks
-dedup /path --action hardlink --dry-run
+dedup --action hardlink --dry-run
 
 # Actually replace duplicates with hardlinks
-dedup /path --action hardlink
+dedup --action hardlink
 
 # Skip files smaller than 1KB
-dedup /path --min-size 1024
+dedup --min-size 1024
 
-# Disable progress bars (useful for scripts/CI)
-dedup /path --no-progress
+# Disable progress bars
+dedup --no-progress
+
+# Use in scripts
+dedup --no-progress --format json
 ```
 
 ## CLI Options
+
+All options can be used in combination.
 
 | Option               | Short | Description                                      |
 | -------------------- | ----- | ------------------------------------------------ |
@@ -57,16 +80,34 @@ dedup /path --no-progress
 | `--dry-run`          |       | Preview hardlink changes without modifying files |
 | `--no-progress`      |       | Disable progress bars                            |
 
+## Benchmarks
+
+Reference benchmark results for a 10GB dataset with various duplicate ratios and file size distributions can be found below.
+For more details, see [benchmark docs](benchmark/README.md).
+
+In all tested scenarios, `dedup` outperforms other tested duplicate file finder tools, especially on slower disks where
+the multi-stage filtering and parallel computing shines by minimizing the downtime waiting for disk I/O.
+
+### Slow Disk (~500 MB/s read/write)
+
+![Slow Disk Bar Graph](benchmark/results/slow_disk/matrix_by_profile.png)
+
+### Fast Disk (~1.75 GB/s read/write)
+
+![Fast Disk Bar Graph](benchmark/results/fast_disk/matrix_by_profile.png)
+
 ## How It Works
 
 The tool uses a multi-stage pipeline to minimize disk I/O to reduce runtime:
 
 1. **Scan**: Walk directory tree, collect file paths and sizes
-2. **Size grouping**: Group files by size. Files with unique sizes cannot be duplicates — skip them early.
-3. **Partial hash**: For remaining candidates, hash only the first 8KB. Different partial hashes = different files.
+2. **Size grouping**: Group files by size.
+3. **Partial hash**: For remaining candidates, hash only the first 8KB. Group by this partial hash.
 4. **Full hash**: For files with matching partial hashes, compute full content hash to confirm duplicates.
 
 This approach avoids reading entire file contents for most files.
+
+Example:
 
 ```
 1000 files
@@ -83,14 +124,9 @@ This approach avoids reading entire file contents for most files.
 When using `--action hardlink`, duplicate files are replaced with hardlinks to a single copy.
 
 Note that hardlinking files means the metadata such as file ownership and permissions are lost for the duplicates which are replaced by hardlinks.
-It is planned to improve this in future versions, but hardlinking is the only option for now.
+It is planned to provide other options in the future, but hardlinking is the only option for now.
 
 If you are packaging the deduplicated files later, consider using a hardlink-aware archiver like `tar` to benefit from space savings.
-
-- All hardlinked files share the same inode (same data on disk)
-- Deleting any one file doesn't affect the others
-- Original selection: shortest path is kept as the "original", others are replaced with hardlinks to it.
-- Only works within the same filesystem and requires write permissions on the "original" file.
 
 Use `--dry-run --verbose` first to preview what would change.
 
@@ -125,7 +161,7 @@ Duplicate Report
 
 ## Limitations
 
-- Hardlinks only work within the same filesystem (cross-device links will fail and be reported as errors)
+- Because Hardlinks are the only deduplication method currently supported, only files within the same filesystem can be deduplicated
 - Symlinks are ignored
 
 ## License

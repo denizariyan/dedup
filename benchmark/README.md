@@ -34,6 +34,12 @@ run-docker.sh --size 10G
 
 This will generate datasets of size 10GB for each profile and run all tools on them, saving results to `benchmark/results/`.
 
+There are preset dataset profiles to simulate different scenarios:
+
+- `small-heavy`: mostly small files.
+- `mixed`: a more uniform distribution of file sizes.
+- `large-heavy`: mostly large files.
+
 ## Results
 
 Repository includes pre-generated results for reference in `benchmark/results/`.
