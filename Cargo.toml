@@ -1,5 +1,5 @@
 [package]
-name = "dedup"
+name = "dedup-cli"
 version = "0.1.0"
 edition = "2024"
 description = "An extremely fast and efficient duplicate file finder"
@@ -14,6 +14,9 @@ exclude = [
     ".github",
 ]
 
+[[bin]]
+name = "dedup"
+path = "src/main.rs"
 
 [dependencies]
 blake3 = "1.8.2"
