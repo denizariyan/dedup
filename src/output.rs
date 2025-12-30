@@ -5,13 +5,13 @@ use colored::Colorize;
 use serde::Serialize;
 
 use crate::hasher::HashGroup;
-use crate::util::format_bytes;
+use crate::util::{format_bytes, format_number};
 
 /// Statistics about duplicate files found
 #[derive(Debug, Clone, Serialize)]
 pub struct DuplicateStats {
-    /// Number of duplicate groups (sets of identical files)
-    pub duplicate_groups: usize,
+    /// Total number of files scanned
+    pub total_files: usize,
     /// Total number of files that are duplicates
     pub duplicate_files: usize,
     /// Total wasted space in bytes (could be reclaimed)
@@ -36,7 +36,7 @@ pub struct DuplicateReport {
 
 impl DuplicateReport {
     /// Build a report from hash groups
-    pub fn from_groups(hash_groups: Vec<HashGroup>) -> Self {
+    pub fn from_groups(hash_groups: Vec<HashGroup>, total_files: usize) -> Self {
         let mut groups = Vec::with_capacity(hash_groups.len());
         let mut wasted_bytes: u64 = 0;
         let mut duplicate_files: usize = 0;
@@ -64,7 +64,7 @@ impl DuplicateReport {
         }
 
         let stats = DuplicateStats {
-            duplicate_groups: groups.len(),
+            total_files,
             duplicate_files,
             wasted_bytes,
         };
@@ -76,12 +76,12 @@ impl DuplicateReport {
     pub fn print_human(&self, verbose: bool) {
         println!("\n{}", "Duplicate Report".bold().underline());
         println!(
-            "  Groups: {}",
-            self.stats.duplicate_groups.to_string().cyan()
+            "  Scanned: {} files",
+            format_number(self.stats.total_files).cyan()
         );
         println!(
-            "  Total duplicate files: {}",
-            self.stats.duplicate_files.to_string().cyan()
+            "  Duplicate files: {}",
+            format_number(self.stats.duplicate_files).cyan()
         );
         println!(
             "  Wasted space: {}",
@@ -104,8 +104,8 @@ impl DuplicateReport {
         for (i, group) in self.groups.iter().enumerate() {
             println!(
                 "\n{} {} ({} each)",
-                format!("Group {}:", i + 1).bold(),
-                format!("{} files", group.files.len()).cyan(),
+                format!("Group {}:", format_number(i + 1)).bold(),
+                format!("{} files", format_number(group.files.len())).cyan(),
                 format_bytes(group.size).yellow()
             );
 
@@ -130,9 +130,9 @@ mod tests {
 
     #[test]
     fn test_empty_report() {
-        let report = DuplicateReport::from_groups(vec![]);
+        let report = DuplicateReport::from_groups(vec![], 100);
 
-        assert_eq!(report.stats.duplicate_groups, 0);
+        assert_eq!(report.stats.total_files, 100);
         assert_eq!(report.stats.duplicate_files, 0);
         assert_eq!(report.stats.wasted_bytes, 0);
         assert!(report.groups.is_empty());
@@ -142,7 +142,7 @@ mod tests {
     fn test_report_json_serialization() {
         let report = DuplicateReport {
             stats: DuplicateStats {
-                duplicate_groups: 1,
+                total_files: 100,
                 duplicate_files: 2,
                 wasted_bytes: 1024,
             },
@@ -153,7 +153,7 @@ mod tests {
         };
 
         let json = serde_json::to_string(&report).unwrap();
-        assert!(json.contains("\"duplicate_groups\":1"));
+        assert!(json.contains("\"total_files\":100"));
         assert!(json.contains("\"wasted_bytes\":1024"));
     }
 }

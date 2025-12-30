@@ -84,18 +84,10 @@ fn main() {
     };
 
     let files = scanner::scan_directory(&cli.path, cli.min_size);
+    let total_files = files.len();
 
     if let Some(sp) = scan_spinner {
         sp.finish_and_clear();
-    }
-
-    if human && cli.no_progress {
-        let total_size: u64 = files.iter().map(|f| f.size).sum();
-        println!(
-            "Scanned {} files ({})",
-            files.len(),
-            util::format_bytes(total_size)
-        );
     }
 
     // Stage 2: Group by size to find potential duplicates
@@ -137,7 +129,7 @@ fn main() {
         })
         .collect();
 
-    let report = output::DuplicateReport::from_groups(duplicate_groups);
+    let report = output::DuplicateReport::from_groups(duplicate_groups, total_files);
 
     if let Some(pb) = progress_bar {
         pb.finish_and_clear();
