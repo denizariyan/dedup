@@ -2,7 +2,19 @@
 name = "dedup"
 version = "0.1.0"
 edition = "2024"
-description = "Lightning-fast duplicate file finder"
+description = "An extremely fast and efficient duplicate file finder"
+license = "MIT"
+license-file = "LICENSE"
+repository = "https://github.com/denizariyan/dedup"
+readme = "README.md"
+keywords = ["duplicate", "file", "finder", "deduplication", "hash"]
+categories = ["command-line-utilities", "filesystem"]
+authors = ["Deniz Ariyan <contact@denizariyan.com>"]
+exclude = [
+    "benchmark",
+    ".github",
+]
+
 
 [dependencies]
 blake3 = "1.8.2"
