@@ -30,6 +30,14 @@ Optionally, duplicate files can be replaced with hardlinks to save disk space.
 
 ## Installation
 
+### Cargo
+
+```bash
+cargo install dedup-cli
+```
+
+### From Source
+
 ```bash
 cargo build --release
 ```
