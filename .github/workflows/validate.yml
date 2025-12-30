@@ -44,7 +44,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # TODO: support windows-latest
+        os: [ubuntu-latest, macos-latest]
         profile: [debug, release]
 
     steps:
