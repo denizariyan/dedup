@@ -82,6 +82,7 @@ All options can be used in combination.
 | `--min-size <BYTES>` | `-s`  | Skip files smaller than this size                           |
 | `--max-size <BYTES>` | `-S`  | Skip files larger than this size                            |
 | `--verbose`          | `-v`  | Show detailed output with file paths                        |
+| `--jobs <N>`         | `-j`  | Number of threads to use (defaults to CPU core count)       |
 | `--dry-run`          |       | Preview hardlink changes without modifying files            |
 | `--no-progress`      |       | Disable progress bars                                       |
 

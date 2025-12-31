@@ -40,13 +40,17 @@ struct Cli {
     #[arg(long)]
     dry_run: bool,
 
-    /// Show detailed output (list each duplicate group)
+    /// Show detailed output
     #[arg(short, long)]
     verbose: bool,
 
     /// Disable progress bars
     #[arg(long)]
     no_progress: bool,
+
+    /// Number of threads to use (defaults to number of CPU cores)
+    #[arg(short = 'j', long)]
+    jobs: Option<usize>,
 }
 
 /// Output format options
@@ -73,6 +77,14 @@ enum Action {
 
 fn main() {
     let cli = Cli::parse();
+
+    if let Some(num_threads) = cli.jobs {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(num_threads)
+            .build_global()
+            .expect("Failed to initialize thread pool");
+    }
+
     let human = matches!(cli.format, OutputFormat::Human);
     let quiet = matches!(cli.format, OutputFormat::Quiet);
     let show_progress = human && !cli.no_progress;
@@ -310,5 +322,14 @@ mod tests {
         assert!(matches!(cli.action, Action::Hardlink));
         assert_eq!(cli.min_size, Some(100));
         assert!(cli.dry_run);
+    }
+
+    #[test]
+    fn test_jobs_flag() {
+        let cli = Cli::parse_from(["dedup", "--jobs", "4"]);
+        assert_eq!(cli.jobs, Some(4));
+
+        let cli = Cli::parse_from(["dedup", "-j", "2"]);
+        assert_eq!(cli.jobs, Some(2));
     }
 }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED]
 
+### Added
+
+- `--jobs` / `-j` option to limit the number of threads used for parallel processing.
+
 ## [0.2.0] - 2025-12-31
 
 ### Added
