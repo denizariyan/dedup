@@ -84,8 +84,14 @@ impl DuplicateReport {
             format_number(self.stats.duplicate_files).cyan()
         );
         println!(
-            "  Wasted space: {}",
+            "  Potential savings: {}",
             format_bytes(self.stats.wasted_bytes).yellow()
+        );
+        println!(
+            "  {}",
+            "Real savings may vary depending on existing links between files."
+                .bright_black()
+                .italic()
         );
 
         if self.groups.is_empty() {

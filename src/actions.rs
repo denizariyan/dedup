@@ -51,6 +51,34 @@ pub fn hardlink_duplicates(
                 continue;
             }
 
+            use std::os::unix::fs::MetadataExt;
+            let meta_path = match fs::metadata(path) {
+                Ok(m) => m,
+                Err(e) => {
+                    result.errors.push((path.clone(), e.to_string()));
+                    continue;
+                }
+            };
+            let meta_original = match fs::metadata(original) {
+                Ok(m) => m,
+                Err(e) => {
+                    result.errors.push((original.clone(), e.to_string()));
+                    continue;
+                }
+            };
+
+            if meta_path.ino() == meta_original.ino() && meta_path.dev() == meta_original.dev() {
+                if print_verbose_logs {
+                    println!(
+                        "{} {} is already hardlinked to {}",
+                        "[skipped]".blue(),
+                        path.display(),
+                        original.display()
+                    );
+                }
+                continue;
+            }
+
             if print_verbose_logs {
                 println!(
                     "{} {} -> {}",
