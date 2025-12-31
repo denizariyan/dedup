@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED]
 
+## [0.2.0] - 2025-12-31
+
 ### Added
 
 - `report-exit-code` action. Exits with exit code 1 if duplicates found, 0 otherwise.
