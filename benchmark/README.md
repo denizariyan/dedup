@@ -3,6 +3,8 @@
 This directory contains benchmarking tools and results for dedup and other duplicate file finders running on a variety of synthetic datasets.
 Where possible, progress bars and other non-essential output are disabled and the tools are running with their default settings.
 
+All benchmarks use the latest available version of each tool at the time.
+
 ## Compared Tools
 
 - dedup (this project)
