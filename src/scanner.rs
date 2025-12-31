@@ -9,8 +9,9 @@ pub struct FileEntry {
 }
 
 /// Scan a directory and return all regular files with their sizes
-pub fn scan_directory(root: &Path, min_size: Option<u64>) -> Vec<FileEntry> {
+pub fn scan_directory(root: &Path, min_size: Option<u64>, max_size: Option<u64>) -> Vec<FileEntry> {
     let min = min_size.unwrap_or(0);
+    let max = max_size.unwrap_or(u64::MAX);
 
     WalkDir::new(root)
         .skip_hidden(false)
@@ -31,7 +32,7 @@ pub fn scan_directory(root: &Path, min_size: Option<u64>) -> Vec<FileEntry> {
                 return None;
             }
 
-            if size < min {
+            if size < min || size > max {
                 return None;
             }
 
@@ -64,7 +65,7 @@ mod tests {
         create_file(temp.path(), "file1.txt", b"hello");
         create_file(temp.path(), "file2.txt", b"world");
 
-        let files = scan_directory(temp.path(), None);
+        let files = scan_directory(temp.path(), None, None);
 
         assert_eq!(files.len(), 2);
     }
@@ -75,7 +76,7 @@ mod tests {
         create_file(temp.path(), "small.txt", b"hi");
         create_file(temp.path(), "large.txt", b"hello world!");
 
-        let files = scan_directory(temp.path(), None);
+        let files = scan_directory(temp.path(), None, None);
 
         let small = files
             .iter()
@@ -99,7 +100,7 @@ mod tests {
         create_file(temp.path(), "root.txt", b"root");
         create_file(&subdir, "nested.txt", b"nested");
 
-        let files = scan_directory(temp.path(), None);
+        let files = scan_directory(temp.path(), None, None);
 
         assert_eq!(files.len(), 2);
         assert!(files.iter().any(|f| f.path.ends_with("root.txt")));
@@ -113,7 +114,7 @@ mod tests {
         fs::create_dir(&subdir).unwrap();
         create_file(temp.path(), "file.txt", b"content");
 
-        let files = scan_directory(temp.path(), None);
+        let files = scan_directory(temp.path(), None, None);
 
         assert_eq!(files.len(), 1);
         assert!(files[0].path.ends_with("file.txt"));
@@ -126,17 +127,43 @@ mod tests {
         create_file(temp.path(), "small.txt", b"hello"); // 5 bytes
         create_file(temp.path(), "large.txt", b"hello world!"); // 12 bytes
 
-        let files = scan_directory(temp.path(), Some(5));
+        let files = scan_directory(temp.path(), Some(5), None);
 
         assert_eq!(files.len(), 2);
         assert!(!files.iter().any(|f| f.path.ends_with("tiny.txt")));
     }
 
     #[test]
+    fn test_max_size_filter() {
+        let temp = TempDir::new().unwrap();
+        create_file(temp.path(), "tiny.txt", b"hi"); // 2 bytes
+        create_file(temp.path(), "small.txt", b"hello"); // 5 bytes
+        create_file(temp.path(), "large.txt", b"hello world!"); // 12 bytes
+
+        let files = scan_directory(temp.path(), None, Some(5));
+
+        assert_eq!(files.len(), 2);
+        assert!(!files.iter().any(|f| f.path.ends_with("large.txt")));
+    }
+
+    #[test]
+    fn test_min_max_size_filter() {
+        let temp = TempDir::new().unwrap();
+        create_file(temp.path(), "tiny.txt", b"hi"); // 2 bytes
+        create_file(temp.path(), "small.txt", b"hello"); // 5 bytes
+        create_file(temp.path(), "large.txt", b"hello world!"); // 12 bytes
+
+        let files = scan_directory(temp.path(), Some(3), Some(10));
+
+        assert_eq!(files.len(), 1);
+        assert!(files.iter().any(|f| f.path.ends_with("small.txt")));
+    }
+
+    #[test]
     fn test_empty_directory() {
         let temp = TempDir::new().unwrap();
 
-        let files = scan_directory(temp.path(), None);
+        let files = scan_directory(temp.path(), None, None);
 
         assert!(files.is_empty());
     }
@@ -152,7 +179,7 @@ mod tests {
             std::os::unix::fs::symlink(&file_path, &link_path).unwrap();
         }
 
-        let files = scan_directory(temp.path(), None);
+        let files = scan_directory(temp.path(), None, None);
 
         assert_eq!(files.len(), 1);
         assert!(files[0].path.ends_with("real.txt"));
@@ -165,7 +192,7 @@ mod tests {
         fs::create_dir_all(&deep).unwrap();
         create_file(&deep, "deep.txt", b"deep content");
 
-        let files = scan_directory(temp.path(), None);
+        let files = scan_directory(temp.path(), None, None);
 
         assert_eq!(files.len(), 1);
         assert!(files[0].path.ends_with("deep.txt"));
@@ -177,7 +204,7 @@ mod tests {
         create_file(temp.path(), "empty.txt", b"");
         create_file(temp.path(), "nonempty.txt", b"content");
 
-        let files = scan_directory(temp.path(), None);
+        let files = scan_directory(temp.path(), None, None);
 
         assert_eq!(files.len(), 1);
         assert!(files[0].path.ends_with("nonempty.txt"));

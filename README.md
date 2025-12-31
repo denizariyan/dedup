@@ -52,15 +52,14 @@ The binary will be at `target/release/dedup`.
 
 ## Usage
 
+See [CLI Options](#cli-options) for all available options.
+
 ```bash
 # Scan current directory, report duplicates
 dedup
 
 # Scan specific directory
 dedup /path/to/directory
-
-# Show each duplicate group (verbose)
-dedup -v
 
 # Output as JSON
 dedup --format json
@@ -70,15 +69,6 @@ dedup --action report-exit-code
 
 # Dry-run replacing duplicates with hardlinks
 dedup --action hardlink --dry-run
-
-# Actually replace duplicates with hardlinks
-dedup --action hardlink
-
-# Skip files smaller than 1KB
-dedup --min-size 1024
-
-# Disable progress bars
-dedup --no-progress
 ```
 
 ## CLI Options
@@ -90,6 +80,7 @@ All options can be used in combination.
 | `--format <FORMAT>`  | `-f`  | Output format: `human` (default), `json`, or `quiet`        |
 | `--action <ACTION>`  | `-a`  | Action: `none` (default), `report-exit-code`, or `hardlink` |
 | `--min-size <BYTES>` | `-s`  | Skip files smaller than this size                           |
+| `--max-size <BYTES>` | `-S`  | Skip files larger than this size                            |
 | `--verbose`          | `-v`  | Show detailed output with file paths                        |
 | `--dry-run`          |       | Preview hardlink changes without modifying files            |
 | `--no-progress`      |       | Disable progress bars                                       |

@@ -28,6 +28,10 @@ struct Cli {
     #[arg(short = 's', long)]
     min_size: Option<u64>,
 
+    /// Maximum file size in bytes to consider (larger files are skipped)
+    #[arg(short = 'S', long)]
+    max_size: Option<u64>,
+
     /// Action to take on duplicates
     #[arg(short, long, value_enum, default_value_t = Action::None)]
     action: Action,
@@ -88,7 +92,7 @@ fn main() {
         None
     };
 
-    let files = scanner::scan_directory(&cli.path, cli.min_size);
+    let files = scanner::scan_directory(&cli.path, cli.min_size, cli.max_size);
     let total_files = files.len();
 
     if let Some(sp) = scan_spinner {
@@ -267,6 +271,18 @@ mod tests {
     fn test_short_min_size() {
         let cli = Cli::parse_from(["dedup", "-s", "4096"]);
         assert_eq!(cli.min_size, Some(4096));
+    }
+
+    #[test]
+    fn test_max_size() {
+        let cli = Cli::parse_from(["dedup", "--max-size", "1048576"]);
+        assert_eq!(cli.max_size, Some(1048576));
+    }
+
+    #[test]
+    fn test_short_max_size() {
+        let cli = Cli::parse_from(["dedup", "-S", "2048"]);
+        assert_eq!(cli.max_size, Some(2048));
     }
 
     #[test]
