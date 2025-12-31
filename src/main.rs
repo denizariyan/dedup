@@ -29,7 +29,7 @@ struct Cli {
     min_size: Option<u64>,
 
     /// Action to take on duplicates
-    #[arg(short, long, value_enum, default_value_t = Action::NoAction)]
+    #[arg(short, long, value_enum, default_value_t = Action::None)]
     action: Action,
 
     /// Preview changes without actually modifying files
@@ -52,13 +52,15 @@ enum OutputFormat {
     Human,
     /// JSON output for scripting
     Json,
+    /// No output (useful with report-exit-code action)
+    Quiet,
 }
 
 /// What to do with found duplicates
 #[derive(Debug, Clone, Copy, ValueEnum)]
 enum Action {
     /// Just report duplicates (default, no file changes)
-    NoAction,
+    None,
     /// Report duplicates and exit with code 1 if any found
     ReportExitCode,
     /// Replace duplicates with hardlinks
@@ -68,6 +70,7 @@ enum Action {
 fn main() {
     let cli = Cli::parse();
     let human = matches!(cli.format, OutputFormat::Human);
+    let quiet = matches!(cli.format, OutputFormat::Quiet);
     let show_progress = human && !cli.no_progress;
 
     // Stage 1: Scan directory for all files
@@ -140,17 +143,19 @@ fn main() {
     match cli.format {
         OutputFormat::Human => report.print_human(cli.verbose),
         OutputFormat::Json => report.print_json(),
+        OutputFormat::Quiet => {}
     }
 
     match cli.action {
-        Action::NoAction => {}
+        Action::None => {}
         Action::ReportExitCode => {
             if !report.groups.is_empty() {
                 std::process::exit(1);
             }
         }
         Action::Hardlink => {
-            let result = actions::hardlink_duplicates(&report.groups, cli.dry_run, cli.verbose);
+            let result =
+                actions::hardlink_duplicates(&report.groups, cli.dry_run, cli.verbose && !quiet);
 
             if human {
                 if cli.dry_run {
@@ -194,7 +199,7 @@ mod tests {
 
         assert_eq!(cli.path, PathBuf::from("."));
         assert!(matches!(cli.format, OutputFormat::Human));
-        assert!(matches!(cli.action, Action::NoAction));
+        assert!(matches!(cli.action, Action::None));
         assert_eq!(cli.min_size, None);
         assert!(!cli.dry_run);
         assert!(!cli.verbose);
@@ -232,6 +237,12 @@ mod tests {
     fn test_json_format() {
         let cli = Cli::parse_from(["dedup", "--format", "json"]);
         assert!(matches!(cli.format, OutputFormat::Json));
+    }
+
+    #[test]
+    fn test_quiet_format() {
+        let cli = Cli::parse_from(["dedup", "--format", "quiet"]);
+        assert!(matches!(cli.format, OutputFormat::Quiet));
     }
 
     #[test]

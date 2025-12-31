@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `report-exit-code` action. Exits with exit code 1 if duplicates found, 0 otherwise
+- `report-exit-code` action. Exits with exit code 1 if duplicates found, 0 otherwise.
+- `quiet` output format. Suppresses all output, useful for scripting in combination with `report-exit-code` action.
 
 ## [0.1.1] - 2025-12-30
 

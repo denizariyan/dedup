@@ -35,7 +35,7 @@ fn select_original(files: &[PathBuf]) -> &PathBuf {
 pub fn hardlink_duplicates(
     groups: &[DuplicateGroup],
     dry_run: bool,
-    verbose: bool,
+    print_verbose_logs: bool,
 ) -> ActionResult {
     let mut result = ActionResult::default();
 
@@ -51,7 +51,7 @@ pub fn hardlink_duplicates(
                 continue;
             }
 
-            if verbose {
+            if print_verbose_logs {
                 println!(
                     "{} {} -> {}",
                     "[dry-run]".yellow(),
@@ -66,7 +66,7 @@ pub fn hardlink_duplicates(
                 // TODO: better handling of files on different filesystems when hardlinking
                 match replace_with_hardlink(path, original) {
                     Ok(()) => {
-                        if verbose {
+                        if print_verbose_logs {
                             println!(
                                 "{} {} -> {}",
                                 "[linked]".green(),
