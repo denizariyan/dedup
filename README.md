@@ -1,7 +1,7 @@
 # dedup
 
 An extremely fast and efficient duplicate file finder written in Rust to provide fast and
-accurate results while minimizing disk I/O.
+accurate results while minimizing disk I/O. Available for Linux and macOS with Windows support planned in the future.
 
 Files are compared using cryptographically secure hashing to ensure accuracy.
 
@@ -65,6 +65,9 @@ dedup -v
 # Output as JSON
 dedup --format json
 
+# Report duplicates with exit code
+dedup --action report-exit-code
+
 # Dry-run replacing duplicates with hardlinks
 dedup --action hardlink --dry-run
 
@@ -76,23 +79,20 @@ dedup --min-size 1024
 
 # Disable progress bars
 dedup --no-progress
-
-# Use in scripts
-dedup --no-progress --format json
 ```
 
 ## CLI Options
 
 All options can be used in combination.
 
-| Option               | Short | Description                                      |
-| -------------------- | ----- | ------------------------------------------------ |
-| `--format <FORMAT>`  | `-f`  | Output format: `human` (default) or `json`       |
-| `--action <ACTION>`  | `-a`  | Action: `report` (default) or `hardlink`         |
-| `--min-size <BYTES>` | `-s`  | Skip files smaller than this size                |
-| `--verbose`          | `-v`  | Show detailed output with file paths             |
-| `--dry-run`          |       | Preview hardlink changes without modifying files |
-| `--no-progress`      |       | Disable progress bars                            |
+| Option               | Short | Description                                                 |
+| -------------------- | ----- | ----------------------------------------------------------- |
+| `--format <FORMAT>`  | `-f`  | Output format: `human` (default), `json`, or `quiet`        |
+| `--action <ACTION>`  | `-a`  | Action: `none` (default), `report-exit-code`, or `hardlink` |
+| `--min-size <BYTES>` | `-s`  | Skip files smaller than this size                           |
+| `--verbose`          | `-v`  | Show detailed output with file paths                        |
+| `--dry-run`          |       | Preview hardlink changes without modifying files            |
+| `--no-progress`      |       | Disable progress bars                                       |
 
 ## Benchmarks
 
@@ -154,6 +154,10 @@ Duplicate Report
   Total duplicate files: 12
   Wasted space: 45.2 MB
 ```
+
+### Quiet
+
+Suppresses all output. Useful for scripting in combination with `--action report-exit-code`.
 
 ### JSON
 
