@@ -29,7 +29,7 @@ struct Cli {
     min_size: Option<u64>,
 
     /// Action to take on duplicates
-    #[arg(short, long, value_enum, default_value_t = Action::Report)]
+    #[arg(short, long, value_enum, default_value_t = Action::NoAction)]
     action: Action,
 
     /// Preview changes without actually modifying files
@@ -58,7 +58,9 @@ enum OutputFormat {
 #[derive(Debug, Clone, Copy, ValueEnum)]
 enum Action {
     /// Just report duplicates (default, no file changes)
-    Report,
+    NoAction,
+    /// Report duplicates and exit with code 1 if any found
+    ReportExitCode,
     /// Replace duplicates with hardlinks
     Hardlink,
 }
@@ -140,28 +142,36 @@ fn main() {
         OutputFormat::Json => report.print_json(),
     }
 
-    if matches!(cli.action, Action::Hardlink) {
-        let result = actions::hardlink_duplicates(&report.groups, cli.dry_run, cli.verbose);
-
-        if human {
-            if cli.dry_run {
-                println!(
-                    "\n[dry-run] Would link {} files, saving {}",
-                    result.files_linked,
-                    util::format_bytes(result.bytes_saved)
-                );
-            } else {
-                println!(
-                    "\nLinked {} files, saved {}",
-                    result.files_linked,
-                    util::format_bytes(result.bytes_saved)
-                );
+    match cli.action {
+        Action::NoAction => {}
+        Action::ReportExitCode => {
+            if !report.groups.is_empty() {
+                std::process::exit(1);
             }
+        }
+        Action::Hardlink => {
+            let result = actions::hardlink_duplicates(&report.groups, cli.dry_run, cli.verbose);
 
-            if !result.errors.is_empty() {
-                eprintln!("\nErrors ({}):", result.errors.len());
-                for (path, err) in &result.errors {
-                    eprintln!("  {}: {}", path.display(), err);
+            if human {
+                if cli.dry_run {
+                    println!(
+                        "\n[dry-run] Would link {} files, saving {}",
+                        result.files_linked,
+                        util::format_bytes(result.bytes_saved)
+                    );
+                } else {
+                    println!(
+                        "\nLinked {} files, saved {}",
+                        result.files_linked,
+                        util::format_bytes(result.bytes_saved)
+                    );
+                }
+
+                if !result.errors.is_empty() {
+                    eprintln!("\nErrors ({}):", result.errors.len());
+                    for (path, err) in &result.errors {
+                        eprintln!("  {}: {}", path.display(), err);
+                    }
                 }
             }
         }
@@ -184,11 +194,17 @@ mod tests {
 
         assert_eq!(cli.path, PathBuf::from("."));
         assert!(matches!(cli.format, OutputFormat::Human));
-        assert!(matches!(cli.action, Action::Report));
+        assert!(matches!(cli.action, Action::NoAction));
         assert_eq!(cli.min_size, None);
         assert!(!cli.dry_run);
         assert!(!cli.verbose);
         assert!(!cli.no_progress);
+    }
+
+    #[test]
+    fn test_report_exit_code_action() {
+        let cli = Cli::parse_from(["dedup", "--action", "report-exit-code"]);
+        assert!(matches!(cli.action, Action::ReportExitCode));
     }
 
     #[test]
