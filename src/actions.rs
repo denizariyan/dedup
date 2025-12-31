@@ -240,4 +240,37 @@ mod tests {
         assert_eq!(ino1, ino2);
         assert_eq!(ino2, ino3);
     }
+
+    #[test]
+    fn test_hardlink_skips_already_linked() {
+        use std::os::unix::fs::MetadataExt;
+
+        let temp = TempDir::new().unwrap();
+        let content = b"duplicate content";
+
+        let path1 = create_file(temp.path(), "file1.txt", content);
+
+        let path2 = temp.path().join("file2.txt");
+        fs::hard_link(&path1, &path2).unwrap();
+
+        // Already hardlinked
+        let ino_before = fs::metadata(&path1).unwrap().ino();
+        assert_eq!(ino_before, fs::metadata(&path2).unwrap().ino());
+
+        let groups = vec![DuplicateGroup {
+            size: content.len() as u64,
+            files: vec![path1.clone(), path2.clone()],
+        }];
+
+        let result = hardlink_duplicates(&groups, false, false);
+
+        assert_eq!(result.files_linked, 0);
+        assert_eq!(result.bytes_saved, 0);
+        assert!(result.errors.is_empty());
+
+        // Still hardlinked
+        let ino_after = fs::metadata(&path1).unwrap().ino();
+        assert_eq!(ino_before, ino_after);
+        assert_eq!(ino_after, fs::metadata(&path2).unwrap().ino());
+    }
 }
