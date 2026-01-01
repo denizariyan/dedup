@@ -51,6 +51,14 @@ struct Cli {
     /// Number of threads to use (defaults to number of CPU cores)
     #[arg(short = 'j', long)]
     jobs: Option<usize>,
+
+    /// Glob patterns to exclude (can be specified multiple times)
+    #[arg(short = 'e', long = "exclude", action = clap::ArgAction::Append)]
+    exclude: Vec<String>,
+
+    /// File containing exclude patterns (one per line, like .gitignore)
+    #[arg(long = "exclude-file")]
+    exclude_file: Option<PathBuf>,
 }
 
 /// Output format options
@@ -73,6 +81,26 @@ enum Action {
     ReportExitCode,
     /// Replace duplicates with hardlinks
     Hardlink,
+}
+
+/// Parse an exclude file (gitignore-style) and return patterns
+fn parse_exclude_file(path: &std::path::Path) -> Vec<String> {
+    match std::fs::read_to_string(path) {
+        Ok(content) => content
+            .lines()
+            .map(|line| line.trim())
+            .filter(|line| !line.is_empty() && !line.starts_with('#'))
+            .map(String::from)
+            .collect(),
+        Err(e) => {
+            eprintln!(
+                "Warning: could not read exclude file '{}': {}",
+                path.display(),
+                e
+            );
+            Vec::new()
+        }
+    }
 }
 
 fn main() {
@@ -104,7 +132,13 @@ fn main() {
         None
     };
 
-    let files = scanner::scan_directory(&cli.path, cli.min_size, cli.max_size);
+    // Combine exclude patterns from --exclude and --exclude-file
+    let mut exclude_patterns = cli.exclude.clone();
+    if let Some(ref exclude_file) = cli.exclude_file {
+        exclude_patterns.extend(parse_exclude_file(exclude_file));
+    }
+
+    let files = scanner::scan_directory(&cli.path, cli.min_size, cli.max_size, &exclude_patterns);
     let total_files = files.len();
 
     if let Some(sp) = scan_spinner {
@@ -331,5 +365,43 @@ mod tests {
 
         let cli = Cli::parse_from(["dedup", "-j", "2"]);
         assert_eq!(cli.jobs, Some(2));
+    }
+
+    #[test]
+    fn test_exclude_flag() {
+        let cli = Cli::parse_from(["dedup", "--exclude", "*.log"]);
+        assert_eq!(cli.exclude, vec!["*.log"]);
+
+        let cli = Cli::parse_from(["dedup", "-e", "*.tmp", "-e", "*.log"]);
+        assert_eq!(cli.exclude, vec!["*.tmp", "*.log"]);
+    }
+
+    #[test]
+    fn test_exclude_file_flag() {
+        let cli = Cli::parse_from(["dedup", "--exclude-file", ".gitignore"]);
+        assert_eq!(cli.exclude_file, Some(PathBuf::from(".gitignore")));
+    }
+
+    #[test]
+    fn test_parse_exclude_file() {
+        use std::io::Write;
+        let temp = tempfile::NamedTempFile::new().unwrap();
+        writeln!(temp.as_file(), "# This is a comment").unwrap();
+        writeln!(temp.as_file(), "*.log").unwrap();
+        #[allow(clippy::writeln_empty_string)] // Testing empty lines
+        writeln!(temp.as_file(), "").unwrap();
+        writeln!(temp.as_file(), " ").unwrap();
+        writeln!(temp.as_file(), "  # Another comment with leading space").unwrap();
+        writeln!(temp.as_file(), "node_modules").unwrap();
+        writeln!(temp.as_file(), "  *.tmp  ").unwrap();
+
+        let patterns = parse_exclude_file(temp.path());
+        assert_eq!(patterns, vec!["*.log", "node_modules", "*.tmp"]);
+    }
+
+    #[test]
+    fn test_parse_exclude_file_nonexistent() {
+        let patterns = parse_exclude_file(std::path::Path::new("/nonexistent/file"));
+        assert!(patterns.is_empty());
     }
 }

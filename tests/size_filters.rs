@@ -1,17 +1,7 @@
 mod common;
 
-use common::{create_file, dedup};
+use common::{create_file, dedup, get_all_filenames};
 use tempfile::TempDir;
-
-fn get_all_filenames(json: &serde_json::Value) -> Vec<String> {
-    json["groups"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .flat_map(|g| g["files"].as_array().unwrap())
-        .map(|f| f.as_str().unwrap().rsplit('/').next().unwrap().to_string())
-        .collect()
-}
 
 #[test]
 fn test_min_size_filter() {
