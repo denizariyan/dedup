@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `--jobs` / `-j` option to limit the number of threads used for parallel processing.
+- `-e` / `--exclude` option to specify glob patterns to exclude files or directories from scanning.
+- `--exclude-file` option to read exclude patterns from a file. One pattern per line, similar to gitignore.
+- `-i` / `--include` option to specify glob patterns to include files for scanning. If specified, only matching files are included.
+- `--include-file` option to read include patterns from a file. One pattern per line.
 
 ## [0.2.0] - 2025-12-31
 

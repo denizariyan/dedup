@@ -59,6 +59,14 @@ struct Cli {
     /// File containing exclude patterns (one per line, like .gitignore)
     #[arg(long = "exclude-file")]
     exclude_file: Option<PathBuf>,
+
+    /// Glob patterns to include (can be specified multiple times). If specified, only matching files are scanned.
+    #[arg(short = 'i', long = "include", action = clap::ArgAction::Append)]
+    include: Vec<String>,
+
+    /// File containing include patterns (one per line)
+    #[arg(long = "include-file")]
+    include_file: Option<PathBuf>,
 }
 
 /// Output format options
@@ -83,8 +91,8 @@ enum Action {
     Hardlink,
 }
 
-/// Parse an exclude file (gitignore-style) and return patterns
-fn parse_exclude_file(path: &std::path::Path) -> Vec<String> {
+/// Parse a glob file (gitignore-style) and return patterns
+fn parse_glob_file(path: &std::path::Path) -> Vec<String> {
     match std::fs::read_to_string(path) {
         Ok(content) => content
             .lines()
@@ -135,10 +143,22 @@ fn main() {
     // Combine exclude patterns from --exclude and --exclude-file
     let mut exclude_patterns = cli.exclude.clone();
     if let Some(ref exclude_file) = cli.exclude_file {
-        exclude_patterns.extend(parse_exclude_file(exclude_file));
+        exclude_patterns.extend(parse_glob_file(exclude_file));
     }
 
-    let files = scanner::scan_directory(&cli.path, cli.min_size, cli.max_size, &exclude_patterns);
+    // Combine include patterns from --include and --include-file
+    let mut include_patterns = cli.include.clone();
+    if let Some(ref include_file) = cli.include_file {
+        include_patterns.extend(parse_glob_file(include_file));
+    }
+
+    let files = scanner::scan_directory(
+        &cli.path,
+        cli.min_size,
+        cli.max_size,
+        &exclude_patterns,
+        &include_patterns,
+    );
     let total_files = files.len();
 
     if let Some(sp) = scan_spinner {
@@ -383,7 +403,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_exclude_file() {
+    fn test_parse_glob_file() {
         use std::io::Write;
         let temp = tempfile::NamedTempFile::new().unwrap();
         writeln!(temp.as_file(), "# This is a comment").unwrap();
@@ -395,13 +415,28 @@ mod tests {
         writeln!(temp.as_file(), "node_modules").unwrap();
         writeln!(temp.as_file(), "  *.tmp  ").unwrap();
 
-        let patterns = parse_exclude_file(temp.path());
+        let patterns = parse_glob_file(temp.path());
         assert_eq!(patterns, vec!["*.log", "node_modules", "*.tmp"]);
     }
 
     #[test]
-    fn test_parse_exclude_file_nonexistent() {
-        let patterns = parse_exclude_file(std::path::Path::new("/nonexistent/file"));
+    fn test_parse_glob_file_nonexistent() {
+        let patterns = parse_glob_file(std::path::Path::new("/nonexistent/file"));
         assert!(patterns.is_empty());
+    }
+
+    #[test]
+    fn test_include_flag() {
+        let cli = Cli::parse_from(["dedup", "--include", "*.rs"]);
+        assert_eq!(cli.include, vec!["*.rs"]);
+
+        let cli = Cli::parse_from(["dedup", "-i", "*.txt", "-i", "*.rs"]);
+        assert_eq!(cli.include, vec!["*.txt", "*.rs"]);
+    }
+
+    #[test]
+    fn test_include_file_flag() {
+        let cli = Cli::parse_from(["dedup", "--include-file", "include.txt"]);
+        assert_eq!(cli.include_file, Some(PathBuf::from("include.txt")));
     }
 }

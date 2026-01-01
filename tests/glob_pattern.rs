@@ -231,3 +231,244 @@ fn test_exclude_file_with_directories_and_globs() {
     assert!(filenames.contains(&"main.rs".to_string()));
     assert!(filenames.contains(&"lib.rs".to_string()));
 }
+
+#[test]
+fn test_include_by_extension() {
+    let dir = TempDir::new().unwrap();
+
+    create_file(dir.path(), "a.txt", b"duplicate");
+    create_file(dir.path(), "b.txt", b"duplicate");
+    create_file(dir.path(), "a.log", b"log dup");
+    create_file(dir.path(), "b.log", b"log dup");
+
+    let output = dedup()
+        .arg(dir.path())
+        .arg("--include")
+        .arg("*.txt")
+        .arg("-f")
+        .arg("json")
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(json["stats"]["total_files"], 2);
+
+    let filenames = get_all_filenames(&json);
+    assert_eq!(filenames.len(), 2);
+    assert!(filenames.contains(&"a.txt".to_string()));
+    assert!(filenames.contains(&"b.txt".to_string()));
+}
+
+#[test]
+fn test_include_multiple_patterns() {
+    let dir = TempDir::new().unwrap();
+
+    create_file(dir.path(), "a.rs", b"rust dup");
+    create_file(dir.path(), "b.rs", b"rust dup");
+    create_file(dir.path(), "a.txt", b"text");
+    create_file(dir.path(), "other.log", b"log");
+
+    let output = dedup()
+        .arg(dir.path())
+        .arg("-i")
+        .arg("*.rs")
+        .arg("-i")
+        .arg("*.txt")
+        .arg("-f")
+        .arg("json")
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(json["stats"]["total_files"], 3);
+
+    let filenames = get_all_filenames(&json);
+    assert_eq!(filenames.len(), 2);
+    assert!(filenames.contains(&"a.rs".to_string()));
+    assert!(filenames.contains(&"b.rs".to_string()));
+}
+
+#[test]
+fn test_include_file_reads_patterns() {
+    let dir = TempDir::new().unwrap();
+    let include_dir = TempDir::new().unwrap();
+
+    let include_file = include_dir.path().join("includes.txt");
+    let mut f = std::fs::File::create(&include_file).unwrap();
+    writeln!(f, "# Only include source files").unwrap();
+    writeln!(f, "*.rs").unwrap();
+    writeln!(f, "*.txt").unwrap();
+
+    create_file(dir.path(), "main.rs", b"rust");
+    create_file(dir.path(), "lib.rs", b"rust");
+    create_file(dir.path(), "notes.txt", b"text");
+    create_file(dir.path(), "skip.log", b"log");
+
+    let output = dedup()
+        .arg(dir.path())
+        .arg("--include-file")
+        .arg(&include_file)
+        .arg("-f")
+        .arg("json")
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(json["stats"]["total_files"], 3);
+
+    let filenames = get_all_filenames(&json);
+    assert_eq!(filenames.len(), 2);
+    assert!(filenames.contains(&"main.rs".to_string()));
+    assert!(filenames.contains(&"lib.rs".to_string()));
+
+    // notes.txt is included but not a duplicate so not in groups
+}
+
+#[test]
+fn test_include_and_exclude_combined() {
+    let dir = TempDir::new().unwrap();
+
+    create_file(dir.path(), "keep.txt", b"keep");
+    create_file(dir.path(), "skip.txt", b"skip"); // matches include but also exclude
+    create_file(dir.path(), "other.log", b"log"); // doesn't match include
+
+    // Include *.txt but exclude skip.txt
+    let output = dedup()
+        .arg(dir.path())
+        .arg("-i")
+        .arg("*.txt")
+        .arg("-e")
+        .arg("skip.txt")
+        .arg("-f")
+        .arg("json")
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(json["stats"]["total_files"], 1);
+
+    let filenames = get_all_filenames(&json);
+    assert_eq!(filenames.len(), 0); // only one file, no duplicates
+}
+
+#[test]
+fn test_include_file_combined_with_include_flag() {
+    let dir = TempDir::new().unwrap();
+    let include_dir = TempDir::new().unwrap();
+
+    let include_file = include_dir.path().join("includes.txt");
+    let mut f = std::fs::File::create(&include_file).unwrap();
+    writeln!(f, "*.rs").unwrap();
+
+    create_file(dir.path(), "main.rs", b"rust");
+    create_file(dir.path(), "notes.txt", b"text");
+    create_file(dir.path(), "skip.log", b"log");
+
+    // Combine --include-file with -i flag
+    let output = dedup()
+        .arg(dir.path())
+        .arg("--include-file")
+        .arg(&include_file)
+        .arg("-i")
+        .arg("*.txt")
+        .arg("-f")
+        .arg("json")
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    // Should include both *.rs (from file) and *.txt (from flag)
+    assert_eq!(json["stats"]["total_files"], 2);
+}
+
+#[test]
+fn test_include_with_exclude_directory() {
+    let dir = TempDir::new().unwrap();
+
+    create_file(dir.path(), "src/main.rs", b"main dup");
+    create_file(dir.path(), "src/lib.rs", b"main dup");
+    create_file(dir.path(), "vendor/dep.rs", b"vendor"); // matches include but in excluded dir
+
+    let output = dedup()
+        .arg(dir.path())
+        .arg("-i")
+        .arg("*.rs")
+        .arg("-e")
+        .arg("vendor")
+        .arg("-f")
+        .arg("json")
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(json["stats"]["total_files"], 2);
+    assert_eq!(json["groups"].as_array().unwrap().len(), 1);
+
+    let filenames = get_all_filenames(&json);
+    assert!(filenames.contains(&"main.rs".to_string()));
+    assert!(filenames.contains(&"lib.rs".to_string()));
+}
+
+#[test]
+fn test_include_file_and_exclude_file_combined() {
+    let dir = TempDir::new().unwrap();
+    let pattern_dir = TempDir::new().unwrap();
+
+    // Create include file
+    let include_file = pattern_dir.path().join("includes.txt");
+    let mut f = std::fs::File::create(&include_file).unwrap();
+    writeln!(f, "*.rs").unwrap();
+    writeln!(f, "*.txt").unwrap();
+
+    // Create exclude file
+    let exclude_file = pattern_dir.path().join("excludes.txt");
+    let mut f = std::fs::File::create(&exclude_file).unwrap();
+    writeln!(f, "test_*.rs").unwrap();
+    writeln!(f, "node_modules").unwrap();
+
+    create_file(dir.path(), "main.rs", b"main dup");
+    create_file(dir.path(), "lib.rs", b"main dup");
+    create_file(dir.path(), "test_main.rs", b"test"); // excluded by pattern
+    create_file(dir.path(), "readme.txt", b"readme");
+    create_file(dir.path(), "node_modules/dep.rs", b"dep"); // excluded by directory
+
+    let output = dedup()
+        .arg(dir.path())
+        .arg("--include-file")
+        .arg(&include_file)
+        .arg("--exclude-file")
+        .arg(&exclude_file)
+        .arg("-f")
+        .arg("json")
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(json["stats"]["total_files"], 3);
+
+    let filenames = get_all_filenames(&json);
+    assert!(filenames.contains(&"main.rs".to_string()));
+    assert!(filenames.contains(&"lib.rs".to_string()));
+    // readme.txt is included but not a duplicate so not in groups
+}

@@ -27,6 +27,7 @@ Optionally, duplicate files can be replaced with hardlinks to save disk space.
 - BLAKE3 hashing (fast, cryptographically secure)
 - Hardlink replacement with dry-run support
 - Human-readable and JSON output formats
+- Flexible include/exclude glob patterns for filtering files
 
 ## Installation
 
@@ -69,22 +70,41 @@ dedup --action report-exit-code
 
 # Dry-run replacing duplicates with hardlinks
 dedup --action hardlink --dry-run
+
+# Skip files by pattern
+dedup -e "*.log" -e "*.tmp" -e "node_modules"
+
+# Use an exclude file (gitignore-style, one pattern per line)
+dedup --exclude-file .gitignore
+
+# Only scan image files
+dedup --include "*.jpg" --include "*.png"
+
+# Use an include file
+dedup --include-file patterns.txt
+
+# Scan all images, except those in backup folder - if a file matches both include and exclude, exclude takes precedence
+dedup -i "*.jpg" -e "backup"
 ```
 
 ## CLI Options
 
 All options can be used in combination.
 
-| Option               | Short | Description                                                 |
-| -------------------- | ----- | ----------------------------------------------------------- |
-| `--format <FORMAT>`  | `-f`  | Output format: `human` (default), `json`, or `quiet`        |
-| `--action <ACTION>`  | `-a`  | Action: `none` (default), `report-exit-code`, or `hardlink` |
-| `--min-size <BYTES>` | `-s`  | Skip files smaller than this size                           |
-| `--max-size <BYTES>` | `-S`  | Skip files larger than this size                            |
-| `--verbose`          | `-v`  | Show detailed output with file paths                        |
-| `--jobs <N>`         | `-j`  | Number of threads to use (defaults to CPU core count)       |
-| `--dry-run`          |       | Preview hardlink changes without modifying files            |
-| `--no-progress`      |       | Disable progress bars                                       |
+| Option                  | Short | Description                                                                              |
+| ----------------------- | ----- | ---------------------------------------------------------------------------------------- |
+| `--format <FORMAT>`     | `-f`  | Output format: `human` (default), `json`, or `quiet`                                     |
+| `--action <ACTION>`     | `-a`  | Action: `none` (default), `report-exit-code`, or `hardlink`                              |
+| `--min-size <BYTES>`    | `-s`  | Skip files smaller than this size                                                        |
+| `--max-size <BYTES>`    | `-S`  | Skip files larger than this size                                                         |
+| `--exclude <PATTERN>`   | `-e`  | Glob pattern to exclude files or directories (can be used multiple times)                |
+| `--exclude-file <PATH>` |       | File containing exclude patterns (gitignore-style)                                       |
+| `--include <PATTERN>`   | `-i`  | Glob pattern to include files (can be used multiple times). Has no effect on directories |
+| `--include-file <PATH>` |       | File containing include patterns                                                         |
+| `--verbose`             | `-v`  | Show detailed output with file paths                                                     |
+| `--jobs <N>`            | `-j`  | Number of threads to use (defaults to CPU core count)                                    |
+| `--dry-run`             |       | Preview hardlink changes without modifying files                                         |
+| `--no-progress`         |       | Disable progress bars                                                                    |
 
 ## Benchmarks
 
