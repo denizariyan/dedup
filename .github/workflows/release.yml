@@ -8,6 +8,8 @@ on:
 jobs:
   publish-crate:
     uses: ./.github/workflows/publish-crate.yml
+    permissions:
+      id-token: write
 
   github-release:
     needs: publish-crate
