@@ -1,0 +1,21 @@
+name: publish-crate
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-crate:
+    # env only allows main anyways but doesn't hurt...
+    if: github.ref == 'refs/heads/main'
+    environment: DEPLOY_CRATE
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@4be9e76fd7c4901c61fb841f559994984270fce7
+
+      - name: Publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish
