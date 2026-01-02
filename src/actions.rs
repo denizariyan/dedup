@@ -115,10 +115,23 @@ pub fn hardlink_duplicates(
 }
 
 /// Replace a file with a hardlink to another file.
-/// Removes the original file first, then creates the hardlink.
 fn replace_with_hardlink(path: &PathBuf, original: &PathBuf) -> io::Result<()> {
-    fs::remove_file(path)?;
-    fs::hard_link(original, path)?;
+    // Create hardlink with temporary name in the same directory,
+    // then rename to avoid data loss if interrupted in between.
+    let temp_path = path.with_extension(format!(
+        "{}.dedup_tmp",
+        path.extension().unwrap_or_default().to_string_lossy()
+    ));
+
+    // Hardlinking will fail if temp_path already exists from a previous interrupted run.
+    match fs::remove_file(&temp_path) {
+        Ok(_) => (),
+        Err(e) if e.kind() == io::ErrorKind::NotFound => (),
+        Err(e) => return Err(e),
+    };
+
+    fs::hard_link(original, &temp_path)?;
+    fs::rename(&temp_path, path)?;
     Ok(())
 }
 
@@ -272,5 +285,42 @@ mod tests {
         let ino_after = fs::metadata(&path1).unwrap().ino();
         assert_eq!(ino_before, ino_after);
         assert_eq!(ino_after, fs::metadata(&path2).unwrap().ino());
+    }
+
+    #[test]
+    fn test_hardlink_cleans_up_leftover_temp_file() {
+        use std::os::unix::fs::MetadataExt;
+
+        let temp = TempDir::new().unwrap();
+        let content = b"duplicate content";
+
+        let path1 = create_file(temp.path(), "file1.txt", content);
+        let path2 = create_file(temp.path(), "file2.txt", content);
+
+        // Simulate a leftover temp file from an interrupted previous run
+        let leftover_temp = temp.path().join("file2.txt.dedup_tmp");
+        fs::write(&leftover_temp, b"leftover").unwrap();
+        assert!(leftover_temp.exists());
+
+        let groups = vec![DuplicateGroup {
+            size: content.len() as u64,
+            files: vec![path1.clone(), path2.clone()],
+        }];
+
+        let result = hardlink_duplicates(&groups, false, false);
+
+        assert_eq!(result.files_linked, 1);
+        assert!(result.errors.is_empty());
+
+        assert!(!leftover_temp.exists());
+
+        let meta1 = fs::metadata(&path1).unwrap();
+        let meta2 = fs::metadata(&path2).unwrap();
+        assert_eq!(meta1.ino(), meta2.ino());
+
+        let content1 = fs::read(&path1).unwrap();
+        let content2 = fs::read(&path2).unwrap();
+        assert_eq!(content1, content2);
+        assert_eq!(content1, content);
     }
 }
